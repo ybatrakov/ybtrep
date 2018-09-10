@@ -28,7 +28,7 @@ MAMAExpBridgeDLL const char*
 ybtrepBridge_getName (void);
 
 MAMAExpBridgeDLL mama_status
-ybtrepBridge_getDefaultPayloadId (char ***name, char **id);
+ybtrepBridge_getDefaultPayloadId (const char ***name, const char **id);
 
 #ifdef __cplusplus
 }
