@@ -1,8 +1,20 @@
 #include "queue.h"
+#include "QueueImpl.h"
+
+#define GET_NOT_NULL(queue, bridgeQueue)                    \
+    Queue* queue = reinterpret_cast<Queue*>(bridgeQueue);   \
+    if(queue == nullptr) {                                  \
+        return MAMA_STATUS_NULL_ARG;                        \
+    }
 
 mama_status ybtrepBridgeMamaQueue_create (queueBridge* queue, mamaQueue parent) {
-    (void) queue;
-    (void) parent;
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaQueue_create(%p)", parent);
+
+    Queue* res = new Queue();
+    res->parent = parent;
+
+    *queue = reinterpret_cast<queueBridge>(res);
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaQueue_create: created %p", res);
     return MAMA_STATUS_OK;
 }
 
@@ -10,35 +22,51 @@ mama_status ybtrepBridgeMamaQueue_create_usingNative (queueBridge*, mamaQueue, v
     return MAMA_STATUS_NOT_IMPLEMENTED;
 }
 
-mama_status ybtrepBridgeMamaQueue_destroy (queueBridge queue) {
-    (void) queue;
+mama_status ybtrepBridgeMamaQueue_destroy (queueBridge q) {
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaQueue_destroy(%p)", q);
+
+    GET_NOT_NULL(queue, q);
+    delete queue;
+
     return MAMA_STATUS_OK;
 }
 
-mama_status ybtrepBridgeMamaQueue_getEventCount (queueBridge queue, size_t* count) {
-    (void) queue;
+mama_status ybtrepBridgeMamaQueue_getEventCount (queueBridge q, size_t* count) {
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaQueue_getEventCount(%p)", q);
     (void) count;
+    return MAMA_STATUS_NOT_IMPLEMENTED;
+}
+
+mama_status ybtrepBridgeMamaQueue_dispatch (queueBridge q) {
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaQueue_dispatch(%p)", q);
+
+    // We don't implement this function because of bridge design. Instead of calling mamaQueue_dispatch()
+    // call mamaQueue_timedDispatch or mamaQueue_dispatchEvent in tight loop
+    return MAMA_STATUS_NOT_IMPLEMENTED;
+}
+
+mama_status ybtrepBridgeMamaQueue_timedDispatch (queueBridge q, uint64_t timeout) {
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaQueue_timedDispatch(%p, %" PRIu64 ")", q, timeout);
+
+    GET_NOT_NULL(queue, q);
+    queue->dispatch(timeout);
+
     return MAMA_STATUS_OK;
 }
 
-mama_status ybtrepBridgeMamaQueue_dispatch (queueBridge queue) {
-    (void) queue;
+mama_status ybtrepBridgeMamaQueue_dispatchEvent (queueBridge q) {
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaQueue_dispatchEvent(%p)", q);
+
+    GET_NOT_NULL(queue, q);
+    queue->dispatch(0);
+
     return MAMA_STATUS_OK;
 }
 
-mama_status ybtrepBridgeMamaQueue_timedDispatch (queueBridge queue, uint64_t timeout) {
+mama_status ybtrepBridgeMamaQueue_enqueueEvent (queueBridge queue, mamaQueueEventCB callback, void* closure) {
     (void) queue;
-    (void) timeout;
-    return MAMA_STATUS_OK;
-}
-
-mama_status ybtrepBridgeMamaQueue_dispatchEvent (queueBridge queue) {
-    (void) queue;
-    return MAMA_STATUS_OK;
-}
-
-mama_status ybtrepBridgeMamaQueue_enqueueEvent (queueBridge queue) {
-    (void) queue;
+    (void) callback;
+    (void) closure;
     return MAMA_STATUS_OK;
 }
 
@@ -59,8 +87,17 @@ mama_status ybtrepBridgeMamaQueue_removeEnqueueCallback (queueBridge queue) {
     return MAMA_STATUS_OK;
 }
 
-mama_status ybtrepBridgeMamaQueue_getNativeHandle (queueBridge, void**) {
-    return MAMA_STATUS_NOT_IMPLEMENTED;
+mama_status ybtrepBridgeMamaQueue_getNativeHandle (queueBridge q, void** nativeRes) {
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaQueue_getNativeHandle(%p)", q);
+
+    GET_NOT_NULL(queue, q);
+
+    if(nativeRes == 0) {
+        return MAMA_STATUS_NULL_ARG;
+    }
+
+    *nativeRes = queue;
+    return MAMA_STATUS_OK;
 }
 
 mama_status ybtrepBridgeMamaQueue_setHighWatermark (queueBridge queue, size_t highWatermark) {

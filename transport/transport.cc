@@ -1,12 +1,15 @@
 #include "transport.h"
+#include "TransportImpl.h"
 
 mama_status ybtrepBridgeMamaTransport_create (transportBridge* result,
                                               const char*      name,
                                               mamaTransport    parent)
 {
-    (void) result;
-    (void) name;
-    (void) parent;
+    Transport* res = new Transport();
+    res->name.assign(name);
+    res->parent = parent;
+    *result = reinterpret_cast<transportBridge>(res);
+
     return MAMA_STATUS_OK;
 }
 
@@ -29,10 +32,10 @@ mama_status ybtrepBridgeMamaTransport_forceClientDisconnect (transportBridge*,
 }
 
 mama_status ybtrepBridgeMamaTransport_findConnection (transportBridge*,
-                                                    int,
-                                                    mamaConnection*,
-                                                    const char*,
-                                                    uint16_t)
+                                                      int,
+                                                      mamaConnection*,
+                                                      const char*,
+                                                      uint16_t)
 {
     return MAMA_STATUS_NOT_IMPLEMENTED;
 }

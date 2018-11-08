@@ -1,21 +1,44 @@
-#include "transportbridge.h"
-
 #define OPENMAMA_INTEGRATION
 #include <mama/integration/mama.h>
+#include <bridge.h>
+
+#include "transportbridge.h"
 
 namespace {
     const char* BRIDGE_NAME = "ybtrep";
     const char* BRIDGE_VERSION = "0.1";
+
+    bool g_skipUsageNotice = false;
 };
 
 mama_status ybtrepBridge_init (mamaBridge bridgeImpl) {
     MAMA_SET_BRIDGE_COMPILE_TIME_VERSION(BRIDGE_NAME);
-    (void) bridgeImpl;
+
+    g_skipUsageNotice = properties_GetPropertyValueAsBoolean(
+        mamaBridgeImpl_getMetaProperty (bridgeImpl, "skip_usage_notice")) != 0;
+
     return MAMA_STATUS_OK;
 }
 
 mama_status ybtrepBridge_open (mamaBridge bridgeImpl) {
-    (void) bridgeImpl;
+    if (bridgeImpl == 0) {
+        return MAMA_STATUS_NULL_ARG;
+    }
+
+    mamaBridgeImpl* bridge  = (mamaBridgeImpl*) bridgeImpl;
+    mama_status status = mamaQueue_create (&bridge->mDefaultEventQueue, bridgeImpl);
+    if (status != MAMA_STATUS_OK) {
+        mama_log (MAMA_LOG_LEVEL_ERROR,
+                  "ybtrepBridge_open: Failed to create default queue: %s",
+                  mamaStatus_stringForStatus (status));
+        return status;
+    }
+
+    if(! g_skipUsageNotice) {
+        mama_log(MAMA_LOG_LEVEL_WARN, "*** ATTENTION! This bridge is designed to run in \"sequential mode\".\n"
+            "This means that in order to use bridge functionality user process shall call mamaQueue_timedDispatch or mamaQueue_dispatchEvent in tight loop after the bridge is started.");
+    }
+
     return MAMA_STATUS_OK;
 }
 

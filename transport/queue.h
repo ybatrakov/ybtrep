@@ -31,7 +31,7 @@ MAMAExpBridgeDLL mama_status
 ybtrepBridgeMamaQueue_dispatchEvent (queueBridge queue);
 
 MAMAExpBridgeDLL mama_status
-ybtrepBridgeMamaQueue_enqueueEvent (queueBridge queue);
+ybtrepBridgeMamaQueue_enqueueEvent (queueBridge queue, mamaQueueEventCB callback, void* closure);
 
 MAMAExpBridgeDLL mama_status
 ybtrepBridgeMamaQueue_stopDispatch (queueBridge queue);
