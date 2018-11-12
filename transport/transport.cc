@@ -5,10 +5,14 @@ mama_status ybtrepBridgeMamaTransport_create (transportBridge* result,
                                               const char*      name,
                                               mamaTransport    parent)
 {
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaTransport_create(%s, %p)", name, parent);
+
     Transport* res = new Transport();
     res->name.assign(name);
     res->parent = parent;
     *result = reinterpret_cast<transportBridge>(res);
+
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaTransport_create returned %p", res);
 
     return MAMA_STATUS_OK;
 }

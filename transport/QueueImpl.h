@@ -3,13 +3,19 @@
 #include "TransportImpl.h"
 #include <mama/types.h>
 #include <vector>
+#include <algorithm>
 
 struct Queue {
     mamaQueue parent;
     std::vector<Transport*> transports;
 
     void addTransport(Transport* tport) {
-        if(tport != nullptr) {
+        if(tport == nullptr) {
+            return;
+        }
+
+        auto it = std::find(transports.begin(), transports.end(), tport);
+        if(it == transports.end()) {
             transports.push_back(tport);
         }
     }

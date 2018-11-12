@@ -7,3 +7,4 @@ add_definitions(-DMAMA_DLL -DBRIDGE)
 
 add_subdirectory(transport)
 add_subdirectory(payload)
+add_subdirectory(examples)

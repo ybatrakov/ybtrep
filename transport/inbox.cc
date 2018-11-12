@@ -1,3 +1,5 @@
+#include "Utils.h"
+
 #include "inbox.h"
 
 mama_status ybtrepBridgeMamaInbox_create(inboxBridge*             result,
@@ -9,16 +11,15 @@ mama_status ybtrepBridgeMamaInbox_create(inboxBridge*             result,
                                          void*                    closure,
                                          mamaInbox                parent)
 {
-    (void) result;
-    (void) tport;
-    (void) queue;
-    (void) msgCB;
-    (void) errorCB;
-    (void) onInboxDestroyed;
-    (void) closure;
-    (void) parent;
-
-    return MAMA_STATUS_OK;
+    return ybtrepBridgeMamaInbox_createByIndex(result,
+                                               tport,
+                                               0,
+                                               queue,
+                                               msgCB,
+                                               errorCB,
+                                               onInboxDestroyed,
+                                               closure,
+                                               parent);
 }
 
 
@@ -32,15 +33,20 @@ mama_status ybtrepBridgeMamaInbox_createByIndex(inboxBridge*             result,
                                                 void*                    closure,
                                                 mamaInbox                parent)
 {
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaInbox_create(%p, %p, %p)", parent, tport, queue);
+
+    bool rc = Utils::addTransportToQueue(tport, queue);
+    if(!rc) {
+        mama_log(MAMA_LOG_LEVEL_ERROR, "ybtrepBridgeMamaInbox_create: Unable to associate transport with queue");
+        return MAMA_STATUS_PLATFORM;
+    }
+
     (void) result;
-    (void) tport;
     (void) tportIndex;
-    (void) queue;
     (void) msgCB;
     (void) errorCB;
     (void) onInboxDestroyed;
     (void) closure;
-    (void) parent;
 
     return MAMA_STATUS_OK;
 }
