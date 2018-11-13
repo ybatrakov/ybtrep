@@ -7,6 +7,10 @@
 #include "TransportImpl.h"
 
 struct Utils {
+    inline static Queue* getQueue(void* nativeHandle) {
+        return reinterpret_cast<Queue*>(nativeHandle);
+    }
+
     static bool addTransportToQueue(mamaTransport tport, mamaQueue q) {
         Queue* queue = nullptr;
         mama_status rc = mamaQueue_getNativeHandle(q, reinterpret_cast<void**>(&queue));

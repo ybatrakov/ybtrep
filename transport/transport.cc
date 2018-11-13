@@ -12,7 +12,7 @@ mama_status ybtrepBridgeMamaTransport_create (transportBridge* result,
     res->parent = parent;
     *result = reinterpret_cast<transportBridge>(res);
 
-    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaTransport_create returned %p", res);
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaTransport_create created %p", res);
 
     return MAMA_STATUS_OK;
 }
