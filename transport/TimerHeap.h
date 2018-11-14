@@ -9,11 +9,6 @@ struct TimerHeap {
             return;
         }
 
-        if(timer->destroying) {
-            delete timer;
-            return;
-        }
-
         int64_t usec = getTime() + static_cast<int64_t>(timer->interval) * 1000000;
         timerMap.emplace(usec, timer);
     }
@@ -26,10 +21,18 @@ struct TimerHeap {
         if(getTime() < it->first) {
             return nullptr;
         }
-        timerMap.erase(it);
-        schedule(it->second);
 
-        return it->second;
+        Timer* timer = it->second;
+        timerMap.erase(it);
+
+        if(!timer->destroying) {
+            schedule(timer);
+            return timer;
+        }
+        else {
+            delete timer;
+            return nullptr;
+        }
     }
 
     Timer* create(double interval, mamaTimerCb action, mamaTimerCb onTimerDestroyed,

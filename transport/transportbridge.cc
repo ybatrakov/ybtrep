@@ -3,6 +3,7 @@
 #include <bridge.h>
 
 #include "transportbridge.h"
+#include "queue.h"
 
 namespace {
     const char* BRIDGE_NAME = "ybtrep";
@@ -21,6 +22,8 @@ mama_status ybtrepBridge_init (mamaBridge bridgeImpl) {
 }
 
 mama_status ybtrepBridge_open (mamaBridge bridgeImpl) {
+    mama_log(MAMA_LOG_LEVEL_NORMAL, "Bridge open requested");
+
     if (bridgeImpl == 0) {
         return MAMA_STATUS_NULL_ARG;
     }
@@ -43,18 +46,20 @@ mama_status ybtrepBridge_open (mamaBridge bridgeImpl) {
 }
 
 mama_status ybtrepBridge_close (mamaBridge bridgeImpl) {
+    mama_log(MAMA_LOG_LEVEL_NORMAL, "Bridge close requested");
     (void) bridgeImpl;
     return MAMA_STATUS_OK;
 }
 
 mama_status ybtrepBridge_start (mamaQueue defaultEventQueue) {
-  (void) defaultEventQueue;
-    return MAMA_STATUS_OK;
+    mama_log(MAMA_LOG_LEVEL_NORMAL, "Bridge start requested");
+
+    return ybtrepBridgeMamaQueue_startDispatch(defaultEventQueue);
 }
 
 mama_status ybtrepBridge_stop (mamaQueue defaultEventQueue) {
-    (void) defaultEventQueue;
-    return MAMA_STATUS_OK;
+    mama_log(MAMA_LOG_LEVEL_NORMAL, "Bridge stop requested");
+    return mamaQueue_stopDispatch (defaultEventQueue);;
 }
 
 const char* ybtrepBridge_getVersion () {

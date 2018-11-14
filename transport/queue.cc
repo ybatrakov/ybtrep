@@ -1,5 +1,6 @@
 #include "queue.h"
 #include "QueueImpl.h"
+#include "Utils.h"
 
 #define GET_NOT_NULL(queue, bridgeQueue)                    \
     Queue* queue = reinterpret_cast<Queue*>(bridgeQueue);   \
@@ -49,6 +50,11 @@ mama_status ybtrepBridgeMamaQueue_timedDispatch (queueBridge q, uint64_t timeout
     mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaQueue_timedDispatch(%p, %" PRIu64 ")", q, timeout);
 
     GET_NOT_NULL(queue, q);
+
+    if(!queue->dispatching) {
+        return MAMA_STATUS_NOT_INITIALISED;
+    }
+
     queue->dispatch(timeout);
 
     return MAMA_STATUS_OK;
@@ -58,6 +64,11 @@ mama_status ybtrepBridgeMamaQueue_dispatchEvent (queueBridge q) {
     mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaQueue_dispatchEvent(%p)", q);
 
     GET_NOT_NULL(queue, q);
+
+    if(!queue->dispatching) {
+        return MAMA_STATUS_NOT_INITIALISED;
+    }
+
     queue->dispatch(0);
 
     return MAMA_STATUS_OK;
@@ -70,8 +81,25 @@ mama_status ybtrepBridgeMamaQueue_enqueueEvent (queueBridge queue, mamaQueueEven
     return MAMA_STATUS_OK;
 }
 
-mama_status ybtrepBridgeMamaQueue_stopDispatch (queueBridge queue) {
-    (void) queue;
+mama_status ybtrepBridgeMamaQueue_startDispatch (mamaQueue q) {
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaQueue_startDispatch(%p)", q);
+
+    Queue* queue = Utils::getQueue(q);
+    if(queue == nullptr) {
+        return MAMA_STATUS_NULL_ARG;
+    }
+
+    queue->dispatching = true;
+
+    return MAMA_STATUS_OK;
+}
+
+mama_status ybtrepBridgeMamaQueue_stopDispatch (queueBridge qb) {
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaQueue_stopDispatch(%p)", qb);
+
+    GET_NOT_NULL(queue, qb);
+    queue->dispatching = false;
+
     return MAMA_STATUS_OK;
 }
 
@@ -103,11 +131,11 @@ mama_status ybtrepBridgeMamaQueue_getNativeHandle (queueBridge q, void** nativeR
 mama_status ybtrepBridgeMamaQueue_setHighWatermark (queueBridge queue, size_t highWatermark) {
     (void) queue;
     (void) highWatermark;
-    return MAMA_STATUS_OK;
+    return MAMA_STATUS_NOT_IMPLEMENTED;
 }
 
 mama_status ybtrepBridgeMamaQueue_setLowWatermark (queueBridge queue, size_t lowWatermark) {
     (void) queue;
     (void) lowWatermark;
-    return MAMA_STATUS_OK;
+    return MAMA_STATUS_NOT_IMPLEMENTED;
 }

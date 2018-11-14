@@ -51,6 +51,11 @@ ybtrepBridgeMamaQueue_setHighWatermark (queueBridge queue, size_t highWatermark)
 MAMAExpBridgeDLL mama_status
 ybtrepBridgeMamaQueue_setLowWatermark (queueBridge queue, size_t lowWatermark);
 
+/* ------- Private functions ------- */
+
+mama_status
+ybtrepBridgeMamaQueue_startDispatch (mamaQueue queue);
+
 #ifdef __cplusplus
 }
 #endif

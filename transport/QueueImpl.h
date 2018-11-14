@@ -7,9 +7,14 @@
 #include <algorithm>
 
 struct Queue {
+    bool dispatching;
     mamaQueue parent;
     TimerHeap timerHeap;
     std::vector<Transport*> transports;
+
+    Queue()
+        : dispatching(false)
+    {}
 
     void addTransport(Transport* tport) {
         if(tport == nullptr) {
@@ -37,6 +42,10 @@ struct Queue {
     }
 
     void dispatch(uint64_t timeout) {
+        if(!dispatching) {
+            return;
+        }
+
         const Timer* timer = timerHeap.nextTimer();
         if(timer != nullptr) {
             timer->fire();

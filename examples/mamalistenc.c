@@ -650,10 +650,18 @@ static void buildDataDictionary (void)
             True only if onComplete resulted in the unblocking of the queue
             dispatching
         */
-        while (!gDictionaryComplete)
+        while (!gDictionaryComplete && result == MAMA_STATUS_OK)
         {
-            mamaQueue_timedDispatch(gMamaDefaultQueue, 1);
+            result = mamaQueue_timedDispatch(gMamaDefaultQueue, 0);
         }
+
+        // Checking if the bridge was stopped after timeout
+        if (!gDictionaryComplete)
+        {
+            fprintf (stderr, "Could not create dictionary.\n" );
+            exit(1);
+        }
+
     }
     else if (gDictFromFile)
     {
