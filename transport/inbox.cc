@@ -1,6 +1,6 @@
-#include "Utils.h"
-
 #include "inbox.h"
+#include "QueueImpl.h"
+#include "Utils.h"
 
 mama_status ybtrepBridgeMamaInbox_create(inboxBridge*             result,
                                          mamaTransport            tport,
@@ -41,20 +41,38 @@ mama_status ybtrepBridgeMamaInbox_createByIndex(inboxBridge*             result,
         return MAMA_STATUS_PLATFORM;
     }
 
-    (void) result;
+    Inbox* inbox = new Inbox();
+    inbox->onMsg = msgCB;
+    inbox->onError = errorCB;
+    inbox->onDestroyed = onInboxDestroyed;
+    inbox->parent = parent;
+    inbox->closure = closure;
+
+    *result = reinterpret_cast<inboxBridge>(inbox);
+
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaInbox_create: created %p", inbox);
+
     (void) tportIndex;
-    (void) msgCB;
-    (void) errorCB;
-    (void) onInboxDestroyed;
-    (void) closure;
 
     return MAMA_STATUS_OK;
 }
 
 
 mama_status
-ybtrepBridgeMamaInbox_destroy(inboxBridge inbox) {
-    (void) inbox;
+ybtrepBridgeMamaInbox_destroy(inboxBridge ib) {
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaInbox_destroy(%p, %p, %p)", ib);
+
+    Inbox* inbox = reinterpret_cast<Inbox*>(ib);
+
+    mamaInboxDestroyCallback onDestroyed = inbox->onDestroyed;
+    void* closure = inbox->closure;
+    mamaInbox parent = inbox->parent;
+
+    delete inbox;
+
+    if(onDestroyed) {
+        onDestroyed(parent, closure);
+    }
 
     return MAMA_STATUS_OK;
 }

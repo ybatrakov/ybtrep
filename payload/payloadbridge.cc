@@ -1,9 +1,23 @@
 #include "payloadbridge.h"
 
+#include <mama/mama.h>
+#define OPENMAMA_INTEGRATION
 #include <mama/integration/mama.h>
+
+#include "MsgImpl.h"
+#include "FieldGetter.h"
+#include "FieldSetter.h"
+
+#define GET_NOT_NULL(message, bridgeMsg)                        \
+    Message* message = Message::get(bridgeMsg);                 \
+    if(message == nullptr) {                                    \
+        return MAMA_STATUS_NULL_ARG;                            \
+    }
 
 mama_status
 ybtrepmsgPayload_init(mamaPayloadBridge bridge, char* identifier) {
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepmsgPayload_init(%p)", bridge);
+
     *identifier = MAMA_PAYLOAD_TICK42RMDS;
 
     MAMA_SET_BRIDGE_COMPILE_TIME_VERSION("ybtrepmsg");
@@ -20,8 +34,13 @@ ybtrepmsgPayload_getType(void) {
 MAMAIgnoreDeprecatedClose
 
 mama_status
-ybtrepmsgPayload_create(msgPayload* msg) {
-    *msg = nullptr;
+ybtrepmsgPayload_create(msgPayload* ret) {
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepmsgPayload_create");
+
+    Message* msg = new Message();
+    *ret = reinterpret_cast<msgPayload>(msg);
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepmsgPayload_create: created %p", msg);
+
     return MAMA_STATUS_OK;
 }
 
@@ -40,7 +59,7 @@ mama_status
 ybtrepmsgPayload_copy(const msgPayload    msg,
                       msgPayload*         copy)
 {
-    (void) msg;
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepmsgPayload_copy(%p)", msg);
     (void) copy;
     return MAMA_STATUS_NOT_IMPLEMENTED;
 }
@@ -56,17 +75,23 @@ ybtrepmsgPayload_clear(msgPayload msg)
 mama_status
 ybtrepmsgPayload_destroy(msgPayload msg)
 {
-    (void) msg;
-    return MAMA_STATUS_NOT_IMPLEMENTED;
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepmsgPayload_destroy(%p)", msg);
+    GET_NOT_NULL(message, msg);
+
+    delete message;
+
+    return MAMA_STATUS_OK;
 }
 
 mama_status
 ybtrepmsgPayload_setParent(msgPayload    msg,
                            const mamaMsg parent)
 {
-    (void) msg;
-    (void) parent;
-    return MAMA_STATUS_NOT_IMPLEMENTED;
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepmsgPayload_setParent(%p, %p)", msg, parent);
+    GET_NOT_NULL(message, msg);
+
+    message->parent = parent;
+    return MAMA_STATUS_OK;
 }
 
 mama_status
@@ -307,11 +332,10 @@ ybtrepmsgPayload_addI32(msgPayload          msg,
                         mama_fid_t          fid,
                         mama_i32_t          value)
 {
-    (void) msg;
-    (void) name;
-    (void) fid;
-    (void) value;
-    return MAMA_STATUS_NOT_IMPLEMENTED;
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepmsgPayload_addI32(%p, %s, %d, %d)", msg, name, fid, value);
+    GET_NOT_NULL(message, msg);
+
+    return FieldSetter::setField(message, name, fid, value);
 }
 
 mama_status
@@ -1181,9 +1205,7 @@ ybtrepmsgPayload_getI8(const msgPayload    msg,
                        mama_fid_t          fid,
                        mama_i8_t*          result)
 {
-    (void) msg;
-    (void) name;
-    (void) fid;
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepmsgPayload_getI8(%p, %s, %d)", msg, name, fid);
     (void) result;
     return MAMA_STATUS_NOT_IMPLEMENTED;
 }
@@ -1233,11 +1255,9 @@ ybtrepmsgPayload_getI32(const msgPayload    msg,
                         mama_fid_t          fid,
                         mama_i32_t*         result)
 {
-    (void) msg;
-    (void) name;
-    (void) fid;
-    (void) result;
-    return MAMA_STATUS_NOT_IMPLEMENTED;
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepmsgPayload_getI32(%p, %s, %d)", msg, name, fid);
+    GET_NOT_NULL(message, msg);
+    return FieldGetter::getField(message, name, fid, result);
 }
 
 mama_status

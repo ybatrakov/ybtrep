@@ -1,11 +1,10 @@
 #include "queue.h"
 #include "QueueImpl.h"
-#include "Utils.h"
 
-#define GET_NOT_NULL(queue, bridgeQueue)                    \
-    Queue* queue = reinterpret_cast<Queue*>(bridgeQueue);   \
-    if(queue == nullptr) {                                  \
-        return MAMA_STATUS_NULL_ARG;                        \
+#define GET_NOT_NULL(queue, bridgeQueue)       \
+    Queue* queue = Queue::get(bridgeQueue);    \
+    if(queue == nullptr) {                     \
+        return MAMA_STATUS_NULL_ARG;           \
     }
 
 mama_status ybtrepBridgeMamaQueue_create (queueBridge* queue, mamaQueue parent) {
@@ -47,8 +46,6 @@ mama_status ybtrepBridgeMamaQueue_dispatch (queueBridge q) {
 }
 
 mama_status ybtrepBridgeMamaQueue_timedDispatch (queueBridge q, uint64_t timeout) {
-    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaQueue_timedDispatch(%p, %" PRIu64 ")", q, timeout);
-
     GET_NOT_NULL(queue, q);
 
     if(!queue->dispatching) {
@@ -61,8 +58,6 @@ mama_status ybtrepBridgeMamaQueue_timedDispatch (queueBridge q, uint64_t timeout
 }
 
 mama_status ybtrepBridgeMamaQueue_dispatchEvent (queueBridge q) {
-    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaQueue_dispatchEvent(%p)", q);
-
     GET_NOT_NULL(queue, q);
 
     if(!queue->dispatching) {
@@ -84,11 +79,7 @@ mama_status ybtrepBridgeMamaQueue_enqueueEvent (queueBridge queue, mamaQueueEven
 mama_status ybtrepBridgeMamaQueue_startDispatch (mamaQueue q) {
     mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaQueue_startDispatch(%p)", q);
 
-    Queue* queue = Utils::getQueue(q);
-    if(queue == nullptr) {
-        return MAMA_STATUS_NULL_ARG;
-    }
-
+    GET_NOT_NULL(queue, q);
     queue->dispatching = true;
 
     return MAMA_STATUS_OK;

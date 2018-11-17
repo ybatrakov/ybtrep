@@ -54,4 +54,18 @@ struct Queue {
             (*i)->dispatch(timeout);
         }
     }
+
+    inline static Queue* get(void* nativeHandle) {
+        return reinterpret_cast<Queue*>(nativeHandle);
+    }
+
+    inline static Queue* get(mamaQueue q) {
+        Queue* queue = nullptr;
+        mama_status rc = mamaQueue_getNativeHandle(q, reinterpret_cast<void**>(&queue));
+        if(rc != MAMA_STATUS_OK || queue == nullptr) {
+            return nullptr;
+        }
+
+        return queue;
+    }
 };

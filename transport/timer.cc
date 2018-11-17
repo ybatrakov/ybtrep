@@ -1,6 +1,6 @@
 #include "timer.h"
 #include "TimerImpl.h"
-#include "Utils.h"
+#include "QueueImpl.h"
 
 mama_status ybtrepBridgeMamaTimer_create(timerBridge* result,
                                          void*        nativeQueueHandle,
@@ -17,7 +17,7 @@ mama_status ybtrepBridgeMamaTimer_create(timerBridge* result,
         return MAMA_STATUS_NULL_ARG;
     }
 
-    Queue* queue = Utils::getQueue(nativeQueueHandle);
+    Queue* queue = Queue::get(nativeQueueHandle);
     if(queue == nullptr) {
         mama_log(MAMA_LOG_LEVEL_ERROR, "ybtrepBridgeMamaTimer_create: Could not get queue");
         return MAMA_STATUS_PLATFORM;
