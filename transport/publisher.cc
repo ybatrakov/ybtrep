@@ -1,5 +1,6 @@
 #include "publisher.h"
 #include "PublisherImpl.h"
+#include "Utils.h"
 
 #define GET_NOT_NULL(pub, bridgePub)                            \
     Publisher* pub = reinterpret_cast<Publisher*>(bridgePub);   \
@@ -37,16 +38,7 @@ mama_status ybtrepBridgeMamaPublisher_createByIndex(publisherBridge*  result,
 mama_status ybtrepBridgeMamaPublisher_destroy(publisherBridge publisher) {
     mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaPublisher_destroy(%p)", publisher);
     GET_NOT_NULL(pub, publisher);
-
-    mama_publisherOnDestroyCb cb = pub->callbacks.onDestroy;
-    mamaPublisher parent = pub->parent;
-    void* closure = pub->callbackClosure;
-
-    delete pub;
-
-    if(cb != nullptr) {
-        cb(parent, closure);
-    }
+    Utils::deleteWithCallback(pub);
 
     return MAMA_STATUS_OK;
 }

@@ -44,9 +44,9 @@ mama_status ybtrepBridgeMamaInbox_createByIndex(inboxBridge*             result,
     Inbox* inbox = new Inbox();
     inbox->onMsg = msgCB;
     inbox->onError = errorCB;
-    inbox->onDestroyed = onInboxDestroyed;
+    inbox->onDestroy = onInboxDestroyed;
     inbox->parent = parent;
-    inbox->closure = closure;
+    inbox->callbackClosure = closure;
 
     *result = reinterpret_cast<inboxBridge>(inbox);
 
@@ -62,17 +62,12 @@ mama_status
 ybtrepBridgeMamaInbox_destroy(inboxBridge ib) {
     mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaInbox_destroy(%p, %p, %p)", ib);
 
-    Inbox* inbox = reinterpret_cast<Inbox*>(ib);
-
-    mamaInboxDestroyCallback onDestroyed = inbox->onDestroyed;
-    void* closure = inbox->closure;
-    mamaInbox parent = inbox->parent;
-
-    delete inbox;
-
-    if(onDestroyed) {
-        onDestroyed(parent, closure);
+    Inbox* inbox = Inbox::get(ib);
+    if(inbox == nullptr) {
+        return MAMA_STATUS_NULL_ARG;
     }
+
+    Utils::deleteWithCallback(inbox);
 
     return MAMA_STATUS_OK;
 }

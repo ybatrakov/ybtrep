@@ -1,12 +1,20 @@
 #include "subscription.h"
 #include "Utils.h"
+#include "SubscriptionImpl.h"
+
+#define GET_NOT_NULL(sub, bridgeSub)                    \
+    Subscription* sub = Subscription::get(bridgeSub);   \
+    if(sub == nullptr) {                                \
+        return MAMA_STATUS_NULL_ARG;                    \
+    }
+
 
 mama_status ybtrepBridgeMamaSubscription_create(subscriptionBridge* result,
                                                 const char*         source,
                                                 const char*         symbol,
                                                 mamaTransport       tport,
                                                 mamaQueue           q,
-                                                mamaMsgCallbacks    callback,
+                                                mamaMsgCallbacks    callbacks,
                                                 mamaSubscription    parent,
                                                 void*               closure)
 {
@@ -19,9 +27,17 @@ mama_status ybtrepBridgeMamaSubscription_create(subscriptionBridge* result,
         return MAMA_STATUS_PLATFORM;
     }
 
-    (void) result;
-    (void) callback;
-    (void) closure;
+    Subscription* sub = new Subscription();
+    sub->source = source;
+    sub->symbol = symbol;
+    sub->transport = Transport::get(tport);
+    sub->callbacks = callbacks;
+    sub->parent = parent;
+    sub->callbackClosure = closure;
+
+    *result = reinterpret_cast<subscriptionBridge>(sub);
+
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaSubscription_create: created %p", sub);
 
     return MAMA_STATUS_OK;
 }
@@ -33,42 +49,48 @@ ybtrepBridgeMamaSubscription_createWildCard(subscriptionBridge*     result,
                                             mamaTransport           transport,
                                             mamaQueue               queue,
                                             mamaMsgCallbacks        callback,
-                                            mamaSubscription        subscription,
+                                            mamaSubscription        parent,
                                             void*                   closure)
 {
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaSubscription_createWildCard(%s.%s, %p, %p, %p)",
+             source, symbol, parent, transport, queue);
+
     (void) result;
-    (void) source;
-    (void) symbol;
-    (void) transport;
-    (void) queue;
     (void) callback;
-    (void) subscription;
     (void) closure;
 
-    return MAMA_STATUS_OK;
+    return MAMA_STATUS_NOT_IMPLEMENTED;
 }
 
 mama_status
 ybtrepBridgeMamaSubscription_mute(subscriptionBridge subscription) {
-    (void) subscription;
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaSubscription_mute(%p)", subscription);
+    GET_NOT_NULL(sub, subscription);
+
+    sub->active = false;
+
     return MAMA_STATUS_OK;
 }
 
 mama_status
 ybtrepBridgeMamaSubscription_destroy(subscriptionBridge subscription) {
-    (void) subscription;
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaSubscription_destroy(%p)", subscription);
+    GET_NOT_NULL(sub, subscription);
+
+    Utils::deleteWithCallback(sub);
+
     return MAMA_STATUS_OK;
 }
 
 int
 ybtrepBridgeMamaSubscription_isValid(subscriptionBridge subscription) {
-    (void) subscription;
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaSubscription_isValid(%p)", subscription);
     return 1;
 }
 
 int
 ybtrepBridgeMamaSubscription_hasWildcards(subscriptionBridge subscription) {
-    (void) subscription;
+    mama_log(MAMA_LOG_LEVEL_FINEST, "ybtrepBridgeMamaSubscription_hasWildcards(%p)", subscription);
     return 0;
 }
 
