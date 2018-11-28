@@ -1,14 +1,21 @@
 #pragma once
 
 #include <mama/types.h>
-#include "DeleteUtils.h"
 
 struct Utils {
     static bool addTransportToQueue(mamaTransport tport, mamaQueue q);
 
     template<typename ToDeleteType>
     static void deleteWithCallback(ToDeleteType* d) {
-        DeleteWithCallback<HasCallbacks<ToDeleteType>::value>::del(d);
+        auto destroyCb = d->callbacks.onDestroy;
+        auto parent    = d->parent;
+        void* closure  = d->callbackClosure;
+
+        delete d;
+
+        if(destroyCb) {
+            destroyCb(parent, closure);
+        }
     }
 
     Utils() = delete;

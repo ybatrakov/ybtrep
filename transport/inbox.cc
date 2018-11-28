@@ -42,9 +42,9 @@ mama_status ybtrepBridgeMamaInbox_createByIndex(inboxBridge*             result,
     }
 
     Inbox* inbox = new Inbox();
-    inbox->onMsg = msgCB;
-    inbox->onError = errorCB;
-    inbox->onDestroy = onInboxDestroyed;
+    inbox->callbacks.onMsg = msgCB;
+    inbox->callbacks.onError = errorCB;
+    inbox->callbacks.onDestroy = onInboxDestroyed;
     inbox->parent = parent;
     inbox->callbackClosure = closure;
 

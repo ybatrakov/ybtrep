@@ -5,16 +5,18 @@
 #include <mama/types.h>
 
 struct Inbox {
-    mamaInboxMsgCallback     onMsg;
-    mamaInboxErrorCallback   onError;
-    mamaInboxDestroyCallback onDestroy;
     mamaInbox                parent;
+    struct {
+        mamaInboxMsgCallback     onMsg;
+        mamaInboxErrorCallback   onError;
+        mamaInboxDestroyCallback onDestroy;
+    } callbacks;
     void*                    callbackClosure;
 
     void reply(mamaMsg reply) {
         mama_log(MAMA_LOG_LEVEL_FINER, "Sending message %p to inbox %p", reply, parent);
-        if(onMsg) {
-            onMsg(reply, callbackClosure);
+        if(callbacks.onMsg) {
+            callbacks.onMsg(reply, callbackClosure);
         }
     }
 
